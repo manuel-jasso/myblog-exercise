@@ -3,11 +3,15 @@
  */
 import React from 'react';
 
+import './PostEdit.css';
+
+
 export default class PostEdit extends React.Component {
 
     constructor (props) {
         super(props);
         this.state = {
+            id: props.id,
             title: props.title,
             text: props.text
         }
@@ -17,8 +21,17 @@ export default class PostEdit extends React.Component {
         const props = this.props;
         const state = this.state;
         props.onSave({
+            id: state.id,
             title: state.title,
             text: state.text
+        });
+    }
+
+    onDelete = () => {
+        const props = this.props;
+        const state = this.state;
+        props.onDelete({
+            id: state.id
         });
     }
 
@@ -39,11 +52,11 @@ export default class PostEdit extends React.Component {
     render () {
         const props = this.props;
         const state = this.state;
-
-        let header = (props.id) ? 'Edit Post' : 'New Post';
+        const editing = (props.id) ? true : false;
+        let header = (editing) ? 'Edit Post' : 'New Post';
 
         return (
-            <div>
+            <div className="PostEdit">
                 <h1>{header}</h1>
                 <div>
                     <label>Title:</label>
@@ -51,9 +64,10 @@ export default class PostEdit extends React.Component {
                 </div>
                 <div>
                     <label>Text:</label>
-                    <textarea onChange={this.handleTextChange}>{state.text}</textarea>
+                    <textarea onChange={this.handleTextChange} value={state.text} />
                 </div>
                 <button onClick={this.onSave}>Save</button>
+                {editing ? <button onClick={this.onDelete}>Delete</button> : null}
                 <button onClick={props.onClose}>Close</button>
             </div>
         );

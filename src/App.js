@@ -20,9 +20,9 @@ class App extends Component {
 
   fetchPosts = () => {
     posts.getAll()
-        .then((respJson) => {
+        .then((resp) => {
             this.setState({
-              posts: respJson
+              posts: resp
             });
         })
         .catch((error) => {
@@ -36,20 +36,18 @@ class App extends Component {
     });
   }
 
-  onSavePost = (newPost) => {
-
-    posts.create(newPost)
-    .then((respJson) => {
-        const newPost = {
-          title: respJson.title,
-          text: respJson.text,
-          id: respJson.id,
-          timestamp: respJson.timestamp
+  onCreate = (post) => {
+    posts.create(post)
+    .then((resp) => {
+        const post = {
+          title: resp.title,
+          text: resp.text,
+          id: resp.id,
+          timestamp: resp.timestamp
         };
-
         this.setState((prevState) => {
           return {
-            posts: [...prevState.posts, newPost ],
+            posts: [...prevState.posts, post],
             addNew: false
           };
         });
@@ -62,8 +60,60 @@ class App extends Component {
     });
   }
 
-  onClosePost = () => {
+  onUpdate = (post) => {
+    posts.update(post)
+    .then((resp) => {
+        const posts = this.state.posts.map((post) => {
+          if (post.id === resp.id) {
+            return resp;
+          } else {
+            return post;
+          }
+        });
+        this.setState({
+            posts,
+            editPost: undefined
+        });
+    })
+    .catch((error) => {
+        console.log(error);
+        this.setState({
+          editPost: undefined
+        });
+    });
+  }
+
+  onDelete = (post) => {
+    posts.delete(post)
+    .then((resp) => {
+        const posts = this.state.posts.reduce((acc, p) => {
+          if (post.id !== p.id) {
+            acc.push(p);
+          }
+          return acc;
+        },[]);
+        this.setState({
+            posts,
+            editPost: undefined
+        });
+    })
+    .catch((error) => {
+        console.log(error);
+        this.setState({
+          editPost: undefined
+        });
+    });
+  }
+
+  onEdit = (id) => {
     this.setState({
+      editPost: id
+    });
+  }
+
+  onClose = () => {
+    this.setState({
+      editPost: undefined,
       addNew: false
     });
   }
@@ -73,14 +123,16 @@ class App extends Component {
     let appBody = null;
 
     if (state.addNew) {
-      appBody = <PostEdit onSave={this.onSavePost} onClose={this.onClosePost}></PostEdit>
+      appBody = <PostEdit onSave={this.onCreate} onClose={this.onClose}></PostEdit>
+    } else if (state.editPost) {
+      const post = state.posts.find((post) => post.id === state.editPost);
+      appBody = <PostEdit onSave={this.onUpdate} onDelete={this.onDelete} onClose={this.onClose} id={post.id} title={post.title} text={post.text}></PostEdit>
     } else if (Array.isArray(state.posts)) {
-      appBody = (
+      appBody =
         <div>
-          <PostsList posts={state.posts}></PostsList>
+          <PostsList posts={state.posts} onEdit={this.onEdit}></PostsList>
           <button onClick={this.createNewPost}>Create New Post</button>
         </div>
-      )
     } else {
       appBody = <div>Fetching....</div>;
     }

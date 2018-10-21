@@ -5,15 +5,23 @@ import React from 'react';
 
 export default class PostsListEntry extends React.Component {
 
-    render () {
+    editPost = (event) => {
+        event.preventDefault();
+        const target = event.target;
+        const props = this.props;
+        props.onEdit(parseInt(target.id,10));
+    }
 
-        let date = new Date(this.props.timestamp);
-        let title = this.props.title;
+    render () {
+        let props = this.props;
+        let date = new Date(props.timestamp).toDateString();
+        let title = props.title;
 
         return (
             <div>
-                <span>{date.toDateString()}</span>
-                <span>{title}</span>
+                <span>{date}</span>
+                &nbsp;
+                <a href="." onClick={this.editPost} id={props.id}>{title}</a>
             </div>
         );
     }

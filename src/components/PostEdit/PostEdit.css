@@ -1,0 +1,8 @@
+.PostEdit input {
+    width: 300px;
+}
+
+.PostEdit textarea {
+    width: 300px;
+    height: 100px;
+}

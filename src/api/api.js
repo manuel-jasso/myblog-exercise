@@ -28,9 +28,7 @@ function common_fetch (url, opts, validate = () => true) {
                     try {
                         respJson = JSON.parse(respText);
                     } catch (error) {
-                        // Include respText, not possible if we use response.json()
-                        reject(`Error: ${respText}`);
-                        return;
+                        respJson = {response: respText}
                     }
                     // Validate the response to see if it has the expected content
                     if (validate(respJson)) {
@@ -50,8 +48,8 @@ function common_fetch (url, opts, validate = () => true) {
 
 export const posts = {
 
-    getAll: function (validate) {
-        return common_fetch('http://restedblog.herokuapp.com/mjasso/api/', defaults, validate);
+    getAll: function () {
+        return common_fetch(`http://restedblog.herokuapp.com/mjasso/api/`, defaults);
     },
 
     create: function (postData) {
@@ -59,8 +57,25 @@ export const posts = {
             method: "POST",
             body: `title=${postData.title}&text=${postData.text}`
         });
+        return common_fetch(`http://restedblog.herokuapp.com/mjasso/api/`, opts);
+    },
 
-        return common_fetch('http://restedblog.herokuapp.com/mjasso/api/', opts);
+    update: function (postData) {
+        const opts = Object.assign(defaults, {
+            method: "POST",
+            body: `title=${postData.title}&text=${postData.text}`
+        });
+        return common_fetch(`http://restedblog.herokuapp.com/mjasso/api/${postData.id}`, opts);
+    },
+
+    delete: function (postData) {
+        const opts = Object.assign(defaults, {
+            method: "DELETE"
+        });
+        const validate = (resp) => {
+            return resp.response === 'Post successfully deleted!';
+        }
+        return common_fetch(`http://restedblog.herokuapp.com/mjasso/api/${postData.id}`, opts, validate);
     }
 };
 
