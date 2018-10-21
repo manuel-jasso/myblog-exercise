@@ -14,8 +14,6 @@ class App extends Component {
 
     this.state = {
     };
-
-    this.fetchPosts();
   }
 
   fetchPosts = () => {
@@ -28,6 +26,10 @@ class App extends Component {
         .catch((error) => {
           console.log(error);
         });
+  }
+
+  componentDidMount () {
+    this.fetchPosts();
   }
 
   createNewPost = () => {
